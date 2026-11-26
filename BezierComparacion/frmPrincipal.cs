@@ -17,6 +17,7 @@ namespace BezierComparacion
             btnLimpiar.Click += Limpiar;
             lstPuntos.SelectedIndexChanged += SeleccionarPunto;
             btnGenerar.Click += GenerarCurva;
+            btnComparar.Click += CompararCurvas;
             nudMuestras.ValueChanged += CambiarMuestras;
             pnlDibujo.Paint += Dibujar;
             chkInterpolaciones.CheckedChanged += ActualizarInterpolaciones;
@@ -123,6 +124,36 @@ namespace BezierComparacion
                 trazoCasteljau = casteljau.ConvertAll(punto => new PointF((float)punto.X, (float)punto.Y)).ToArray();
                 curvaBernstein = bernstein;
                 pnlDibujo.Invalidate();
+            }
+            catch (ArgumentException error)
+            {
+                MessageBox.Show(this, error.Message);
+            }
+        }
+
+        private void CompararCurvas(object? sender, EventArgs e)
+        {
+            try
+            {
+                ResultadoComparacion resultado = ComparacionCurvas.Ejecutar(
+                    puntosControl,
+                    (int)nudMuestras.Value);
+
+                string metodoMasRapido = resultado.TiempoBernsteinMs <= resultado.TiempoCasteljauMs
+                    ? "Bernstein"
+                    : "De Casteljau";
+
+                MessageBox.Show(this,
+                    "Repeticiones: " + resultado.Repeticiones + Environment.NewLine +
+                    "Muestras: " + resultado.Muestras + Environment.NewLine +
+                    "Tiempo Bernstein: " + resultado.TiempoBernsteinMs.ToString("0.000") + " ms" + Environment.NewLine +
+                    "Tiempo De Casteljau: " + resultado.TiempoCasteljauMs.ToString("0.000") + " ms" + Environment.NewLine +
+                    "Diferencia maxima: " + resultado.DiferenciaMaxima.ToString("0.000000000000") + Environment.NewLine +
+                    "Diferencia promedio: " + resultado.DiferenciaPromedio.ToString("0.000000000000") + Environment.NewLine +
+                    "Metodo mas rapido en esta prueba: " + metodoMasRapido,
+                    "Comparacion sin medir el dibujo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
             catch (ArgumentException error)
             {
