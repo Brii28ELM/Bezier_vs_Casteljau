@@ -4,7 +4,9 @@ namespace BezierComparacion
     {
         private readonly List<Punto2D> puntosControl = new();
 
-        private List<Punto2D> curva = new();
+        private List<Punto2D> curvaBernstein = new();
+        private PointF[] trazoCasteljau = Array.Empty<PointF>();
+        private IReadOnlyList<Punto2D[]> niveles = Array.Empty<Punto2D[]>();
 
         public frmPrincipal()
         {
@@ -17,6 +19,8 @@ namespace BezierComparacion
             btnGenerar.Click += GenerarCurva;
             nudMuestras.ValueChanged += CambiarMuestras;
             pnlDibujo.Paint += Dibujar;
+            chkInterpolaciones.CheckedChanged += ActualizarInterpolaciones;
+            nudParametro.ValueChanged += ActualizarInterpolaciones;
         }
 
         private void AgregarPunto(object? sender, EventArgs e)
@@ -97,13 +101,15 @@ namespace BezierComparacion
             lstPuntos.SelectedIndex = seleccion;
             lblCantidad.Text = $"Cantidad: {puntosControl.Count}";
             lblGrado.Text = puntosControl.Count == 0 ? "Grado: -" : $"Grado: {puntosControl.Count - 1}";
-            curva.Clear();
-            pnlDibujo.Invalidate();
+            curvaBernstein.Clear();
+            trazoCasteljau = Array.Empty<PointF>();
+            ActualizarInterpolaciones(this, EventArgs.Empty);
         }
 
         private void CambiarMuestras(object? sender, EventArgs e)
         {
-            curva.Clear();
+            curvaBernstein.Clear();
+            trazoCasteljau = Array.Empty<PointF>();
             pnlDibujo.Invalidate();
         }
 
@@ -111,7 +117,11 @@ namespace BezierComparacion
         {
             try
             {
-                curva = Bernstein.GenerarCurva(puntosControl, (int)nudMuestras.Value);
+                int muestras = (int)nudMuestras.Value;
+                var bernstein = Bernstein.GenerarCurva(puntosControl, muestras);
+                var casteljau = DeCasteljau.GenerarCurva(puntosControl, muestras);
+                trazoCasteljau = casteljau.ConvertAll(punto => new PointF((float)punto.X, (float)punto.Y)).ToArray();
+                curvaBernstein = bernstein;
                 pnlDibujo.Invalidate();
             }
             catch (ArgumentException error)
@@ -120,23 +130,52 @@ namespace BezierComparacion
             }
         }
 
+        private void ActualizarInterpolaciones(object? sender, EventArgs e)
+        {
+            nudParametro.Enabled = chkInterpolaciones.Checked;
+            niveles = chkInterpolaciones.Checked && puntosControl.Count >= 2
+                ? DeCasteljau.ObtenerNiveles(puntosControl, (double)nudParametro.Value)
+                : Array.Empty<Punto2D[]>();
+            lblNiveles.Visible = niveles.Count > 0;
+            pnlDibujo.Invalidate();
+        }
+
+        private static void DibujarSegmentos(Graphics dibujo, Pen lapiz, IReadOnlyList<Punto2D> puntos)
+        {
+            for (int i = 1; i < puntos.Count; i++)
+            {
+                Punto2D anterior = puntos[i - 1];
+                Punto2D actual = puntos[i];
+                dibujo.DrawLine(lapiz, (float)anterior.X, (float)anterior.Y,
+                    (float)actual.X, (float)actual.Y);
+            }
+        }
+
         private void Dibujar(object? sender, PaintEventArgs e)
         {
             Graphics dibujo = e.Graphics;
-            for (int i = 1; i < puntosControl.Count; i++)
-            {
-                Punto2D anterior = puntosControl[i - 1];
-                Punto2D actual = puntosControl[i];
-                dibujo.DrawLine(Pens.Gray, (float)anterior.X, (float)anterior.Y,
-                    (float)actual.X, (float)actual.Y);
-            }
+            dibujo.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            DibujarSegmentos(dibujo, Pens.Gray, puntosControl);
 
-            for (int i = 1; i < curva.Count; i++)
+            using Pen lapizBernstein = new(Color.RoyalBlue, 4);
+            using Pen lapizCasteljau = new(Color.DarkOrange, 2)
             {
-                Punto2D anterior = curva[i - 1];
-                Punto2D actual = curva[i];
-                dibujo.DrawLine(Pens.Blue, (float)anterior.X, (float)anterior.Y,
-                    (float)actual.X, (float)actual.Y);
+                DashStyle = System.Drawing.Drawing2D.DashStyle.Dash
+            };
+            DibujarSegmentos(dibujo, lapizBernstein, curvaBernstein);
+            // Una sola polilínea conserva el patrón de guiones entre las muestras.
+            if (trazoCasteljau.Length >= 2)
+                dibujo.DrawLines(lapizCasteljau, trazoCasteljau);
+
+            for (int i = 1; i < niveles.Count; i++)
+            {
+                bool ultimo = i == niveles.Count - 1;
+                Brush color = ultimo ? Brushes.DarkRed : i % 2 == 1 ? Brushes.DarkViolet : Brushes.Teal;
+                using Pen lapizNivel = new(color);
+                DibujarSegmentos(dibujo, lapizNivel, niveles[i]);
+                int radio = ultimo ? 6 : 3;
+                foreach (Punto2D punto in niveles[i])
+                    dibujo.FillEllipse(color, (float)punto.X - radio, (float)punto.Y - radio, 2 * radio, 2 * radio);
             }
 
             for (int i = 0; i < puntosControl.Count; i++)

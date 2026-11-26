@@ -18,6 +18,11 @@ namespace BezierComparacion
         private NumericUpDown nudMuestras = null!;
         private Button btnGenerar = null!;
         private Button btnLimpiar = null!;
+        private CheckBox chkInterpolaciones = null!;
+        private NumericUpDown nudParametro = null!;
+        private Label lblBernstein = null!;
+        private Label lblCasteljau = null!;
+        private Label lblNiveles = null!;
 
         private void InitializeComponent()
         {
@@ -37,6 +42,12 @@ namespace BezierComparacion
             nudMuestras = new NumericUpDown();
             btnGenerar = new Button();
             btnLimpiar = new Button();
+            chkInterpolaciones = new CheckBox();
+            nudParametro = new NumericUpDown();
+            lblBernstein = new Label();
+            lblCasteljau = new Label();
+            lblNiveles = new Label();
+            ((System.ComponentModel.ISupportInitialize)nudParametro).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudX).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudY).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudMuestras).BeginInit();
@@ -147,9 +158,40 @@ namespace BezierComparacion
             btnLimpiar.TabIndex = 15;
             btnLimpiar.Text = "Limpiar";
 
+            chkInterpolaciones.Location = new Point(690, 466);
+            chkInterpolaciones.AutoSize = true;
+            chkInterpolaciones.Text = "Interpolaciones en t";
+            chkInterpolaciones.TabIndex = 16;
+
+            nudParametro.Location = new Point(866, 463);
+            nudParametro.Size = new Size(102, 23);
+            nudParametro.DecimalPlaces = 3;
+            nudParametro.Increment = 0.025M;
+            nudParametro.Maximum = 1;
+            nudParametro.Value = 0.5M;
+            nudParametro.Enabled = false;
+            nudParametro.AccessibleName = "Parámetro t";
+            nudParametro.TabIndex = 17;
+
+            lblBernstein.Location = new Point(12, 503);
+            lblBernstein.AutoSize = true;
+            lblBernstein.ForeColor = Color.RoyalBlue;
+            lblBernstein.Text = "Bernstein · línea continua";
+
+            lblCasteljau.Location = new Point(203, 503);
+            lblCasteljau.AutoSize = true;
+            lblCasteljau.ForeColor = Color.SaddleBrown;
+            lblCasteljau.Text = "De Casteljau · línea discontinua";
+
+            lblNiveles.Location = new Point(438, 503);
+            lblNiveles.AutoSize = true;
+            lblNiveles.ForeColor = Color.DarkRed;
+            lblNiveles.Text = "B(t) · marcador rojo";
+            lblNiveles.Visible = false;
+
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(980, 504);
+            ClientSize = new Size(980, 532);
             Controls.Add(pnlDibujo);
             Controls.Add(lblX);
             Controls.Add(nudX);
@@ -166,6 +208,11 @@ namespace BezierComparacion
             Controls.Add(nudMuestras);
             Controls.Add(btnGenerar);
             Controls.Add(btnLimpiar);
+            Controls.Add(chkInterpolaciones);
+            Controls.Add(nudParametro);
+            Controls.Add(lblBernstein);
+            Controls.Add(lblCasteljau);
+            Controls.Add(lblNiveles);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             Name = "frmPrincipal";
@@ -173,7 +220,9 @@ namespace BezierComparacion
             ((System.ComponentModel.ISupportInitialize)nudX).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudY).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudMuestras).EndInit();
+            ((System.ComponentModel.ISupportInitialize)nudParametro).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
     }
 }
