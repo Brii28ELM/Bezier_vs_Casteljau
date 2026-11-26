@@ -18,6 +18,7 @@ namespace BezierComparacion
         private NumericUpDown nudMuestras = null!;
         private Button btnGenerar = null!;
         private Button btnLimpiar = null!;
+        private Button btnComparar = null!;
         private CheckBox chkInterpolaciones = null!;
         private NumericUpDown nudParametro = null!;
         private Label lblBernstein = null!;
@@ -42,6 +43,7 @@ namespace BezierComparacion
             nudMuestras = new NumericUpDown();
             btnGenerar = new Button();
             btnLimpiar = new Button();
+            btnComparar = new Button();
             chkInterpolaciones = new CheckBox();
             nudParametro = new NumericUpDown();
             lblBernstein = new Label();
@@ -158,6 +160,12 @@ namespace BezierComparacion
             btnLimpiar.TabIndex = 15;
             btnLimpiar.Text = "Limpiar";
 
+            btnComparar.Name = "btnComparar";
+            btnComparar.Location = new Point(690, 503);
+            btnComparar.Size = new Size(278, 30);
+            btnComparar.TabIndex = 18;
+            btnComparar.Text = "Comparar rendimiento (10 veces)";
+
             chkInterpolaciones.Location = new Point(690, 466);
             chkInterpolaciones.AutoSize = true;
             chkInterpolaciones.Text = "Interpolaciones en t";
@@ -191,7 +199,7 @@ namespace BezierComparacion
 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(980, 532);
+            ClientSize = new Size(980, 545);
             Controls.Add(pnlDibujo);
             Controls.Add(lblX);
             Controls.Add(nudX);
@@ -208,6 +216,7 @@ namespace BezierComparacion
             Controls.Add(nudMuestras);
             Controls.Add(btnGenerar);
             Controls.Add(btnLimpiar);
+            Controls.Add(btnComparar);
             Controls.Add(chkInterpolaciones);
             Controls.Add(nudParametro);
             Controls.Add(lblBernstein);
